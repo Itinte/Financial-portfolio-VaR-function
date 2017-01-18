@@ -1,0 +1,57 @@
+Option Base 1
+
+Function MaVar(MatriceCovar As Range, PoidsTitres As Range, NiveauQuantile As Double, Invest As Double)
+
+Dim NbeActifs As Integer
+Dim Matrix() As Variant
+Dim MPoidsTitres() As Variant
+Dim TPoidsTitres() As Variant
+
+NbeActifs = MatriceCovar.Rows.Count
+
+ReDim Matrix(NbeActifs, NbeActifs)
+Matrix = MatriceCovar
+
+ReDim MPoidsTitres(NbeActifs, 1)
+MPoidsTitres = PoidsTitres
+
+
+ReDim TPoidsTitres(1, NbeActifs)
+TPoidsTitres = Application.Transpose(MPoidsTitres)
+
+Dim MatEtape1() As Variant
+ReDim MatEtape1(1, 3)
+MatEtape1 = Application.MMult(TPoidsTitres, Matrix)
+
+Dim MatEtape2() As Variant
+ReDim MatEtape2(1)
+MatEtape2 = Application.MMult(MatEtape1, MPoidsTitres)
+
+
+Dim Reponse(2, 1)
+Reponse(1, 1) = 0 + Application.NormSInv(NiveauQuantile) * (Invest * Sqr(MatEtape2(1)))
+
+
+Dim VectActifs
+ReDim VectActifs(NbeActifs)
+
+
+For i = 1 To NbeActifs
+    VectActifs(i) = 0 + Application.NormSInv(NiveauQuantile) * PoidsTitres(i) * Invest * Sqr(MatriceCovar(i, i))
+Next i
+
+
+Dim Somme As Double
+Somme = 0
+For i = 1 To NbeActifs
+    Somme = Somme + VectActifs(i)
+Next i
+
+
+Reponse(2, 1) = Somme
+
+
+MaVar = Reponse
+
+End Function
+
